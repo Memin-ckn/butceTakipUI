@@ -16,8 +16,8 @@ const Home = () => {
     const fetchDataFromApi = async () => {
       const result = await getTotal();
       setData({
-        incomeTotal: result.data.total_income,
-        expenseTotal: result.data.total_expense
+        incomeTotal: result?.data?.total_income,
+        expenseTotal: result?.data?.total_expense
       });
     };
     fetchDataFromApi();
@@ -38,20 +38,20 @@ const Home = () => {
         return { categoryId, amount, category: categoryName };
       })));
 
-      const mostValuedExpenseCategory = Object.keys(result.data.expenses).reduce((maxKey, currentKey) => {
-        return result.data.expenses[currentKey] > result.data.expenses[maxKey] ? currentKey : maxKey;
-      }, Object.keys(result.data.expenses)[0]);
+      const mostValuedExpenseCategory = Object.keys(result?.data?.expenses).reduce((maxKey, currentKey) => {
+        return result?.data?.expenses[currentKey] > result?.data?.expenses[maxKey] ? currentKey : maxKey;
+      }, Object.keys(result?.data?.expenses)[0]);
 
-      const mostValuedExpenseAmount = result.data.expenses[mostValuedExpenseCategory];
+      const mostValuedExpenseAmount = result?.data?.expenses[mostValuedExpenseCategory];
       const expenseCategory = await getExpenseCategory(mostValuedExpenseCategory);
       const expenseCategoryName = expenseCategory.data ? expenseCategory.data.name : "?";
       setMostValuedExpense({ category: expenseCategoryName, amount: mostValuedExpenseAmount });
 
-      const mostValuedIncomeCategory = Object.keys(result.data.incomes).reduce((maxKey, currentKey) => {
-        return result.data.incomes[currentKey] > result.data.incomes[maxKey] ? currentKey : maxKey;
-      }, Object.keys(result.data.incomes)[0]);
+      const mostValuedIncomeCategory = Object.keys(result?.data?.incomes).reduce((maxKey, currentKey) => {
+        return result?.data?.incomes[currentKey] > result?.data?.incomes[maxKey] ? currentKey : maxKey;
+      }, Object.keys(result?.data?.incomes)[0]);
 
-      const mostValuedIncomeAmount = result.data.incomes[mostValuedIncomeCategory];
+      const mostValuedIncomeAmount = result?.data?.incomes[mostValuedIncomeCategory];
       const incomeCategory = await getIncomeCategory(mostValuedIncomeCategory);
       const incomeCategoryName = incomeCategory.data ? incomeCategory.data.name : "?";
       setMostValuedIncome({ category: incomeCategoryName, amount: mostValuedIncomeAmount });

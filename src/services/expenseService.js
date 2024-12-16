@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/expenses/';
-const CATEGORY_API_URL = 'http://localhost:5000/expense-categories/';
+const API_URL = 'http://localhost:5001/expenses/';
+const CATEGORY_API_URL = 'http://localhost:5001/expense-categories/';
 
 const token = localStorage.getItem('token');
 const config = token

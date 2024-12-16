@@ -19,7 +19,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/auth/login', {
+      const response = await axios.post('http://127.0.0.1:5001/auth/login', {
         username,
         password,
       });
@@ -79,8 +79,14 @@ const Login = () => {
               required
             />
           </div>
-          <button type="submit" className="btn btn-primary w-100">Giriş</button>
+          <button type="submit" className="btn btn-primary w-100 mb-3">Giriş</button>
         </form>
+        <div className="text-center">
+          <p className="mb-0">Hesabınız yok mu?</p>
+          <a href="/register" className="btn btn-link text-decoration-none">
+            Kayıt Olun
+          </a>
+        </div>
       </div>
     </div>
   );
