@@ -113,11 +113,28 @@ const Home = () => {
     ...expensesWithCategory.map((expense) => [expense.category, expense.amount])
   ];
 
-  const canfleChartdata = [
+  const candleChartdata = [
     ["Kategori", "Miktar", { role: "style" }],
     [mostValuedIncome.category || 'Loading...', mostValuedIncome.amount, "green"],
     [mostValuedExpense.category || 'Loading...', mostValuedExpense.amount, "red"],
   ];
+
+  const candleOptions = {
+    theme: 'maximized',
+    chartArea: {
+      width: '80%',
+      height: '80%',
+    },
+    legend: {
+      position: 'bottom',
+      alignment: 'center',
+    },
+    fontSize: 12,
+    tooltip: { trigger: 'none' },
+    vAxis: {
+      minValue: 0,
+    },
+  };
 
   const options = {
     pieSliceText: 'percentage',
@@ -159,8 +176,8 @@ const Home = () => {
         <div className="chart-box">
           <Chart
             chartType="ColumnChart"
-            data={canfleChartdata}
-            options={options}
+            data={candleChartdata}
+            options={candleOptions}
             width="100%"
             height="300px"
           />
