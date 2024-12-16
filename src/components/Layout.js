@@ -9,6 +9,10 @@ const Layout = ({ children }) => {
 
         navigate('/login');
     };
+
+    console.log({
+        token: localStorage.getItem('token'),
+    })
     return (
         <div>
             {/* Navbar */}

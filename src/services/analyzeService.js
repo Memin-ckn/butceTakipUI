@@ -1,18 +1,9 @@
 import axios from 'axios';
+import { useEffect, useState } from 'react';
 
 const API_URL = 'http://localhost:5001/analyze/';
 
-const token = localStorage.getItem('token');
-const config = token
-    ? {
-        headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-    }
-    : { headers: { 'Content-Type': 'application/json' } };
-
-export const getTotal = async () => {
+export const getTotal = async (config) => {
     try {
         const response = await axios.get(API_URL, config);
         return response.data;
@@ -22,7 +13,7 @@ export const getTotal = async () => {
     }
 };
 
-export const getTotalWithCategory = async () => {
+export const getTotalWithCategory = async (config) => {
     try {
         const response = await axios.get(`${API_URL}total-with-category`, config);
         return response.data;

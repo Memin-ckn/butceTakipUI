@@ -3,18 +3,8 @@ import axios from 'axios';
 const API_URL = 'http://localhost:5001/expenses/';
 const CATEGORY_API_URL = 'http://localhost:5001/expense-categories/';
 
-const token = localStorage.getItem('token');
-const config = token
-  ? {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    }
-  : { headers: { 'Content-Type': 'application/json' } };
-
 // Fetch all expenses
-export const getExpenses = async () => {
+export const getExpenses = async (config) => {
   try {
     const response = await axios.get(API_URL, config);
     return response.data;
@@ -25,7 +15,7 @@ export const getExpenses = async () => {
 };
 
 // Fetch a single category by ID
-export const getCategory = async (categoryId) => {
+export const getCategory = async (categoryId, config) => {
   try {
     const response = await axios.get(`${CATEGORY_API_URL}get?id=${categoryId}`, config);
     return response.data;
@@ -36,7 +26,7 @@ export const getCategory = async (categoryId) => {
 };
 
 // Fetch all categories
-export const getCategories = async () => {
+export const getCategories = async (config) => {
   try {
     const response = await axios.get(CATEGORY_API_URL, config);
     return response.data;
@@ -47,7 +37,7 @@ export const getCategories = async () => {
 };
 
 // Create a new expense
-export const createExpense = async (expenseData) => {
+export const createExpense = async (expenseData, config) => {
   try {
     const response = await axios.post(API_URL, expenseData, config);
     return response.data;
@@ -58,7 +48,7 @@ export const createExpense = async (expenseData) => {
 };
 
 // Update an existing expense
-export const updateExpense = async (expenseData) => {
+export const updateExpense = async (expenseData, config) => {
   try {
     const response = await axios.put(API_URL, expenseData, config);
     return response.data;
@@ -69,7 +59,7 @@ export const updateExpense = async (expenseData) => {
 };
 
 // Delete an expense
-export const deleteExpense = async (expenseData) => {
+export const deleteExpense = async (expenseData, config) => {
   try {
     const response = await axios.delete(API_URL, {
       data: expenseData,

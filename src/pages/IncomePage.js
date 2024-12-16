@@ -9,45 +9,68 @@ const IncomePage = () => {
   const [newIncome, setNewIncome] = useState({ id: '', category_id: '', amount: '' });
   const [isEditing, setIsEditing] = useState(false);
 
+  const [token, setToken] = useState('');
+  const [config, setConfig] = useState({ headers: { 'Content-Type': 'application/json' } });
+
+  useEffect(() => {
+    const t = localStorage.getItem('token');
+    if (t) {
+      setToken(t);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (token) {
+      setConfig({
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+  }, [token]);
+
   // Fetch incomes and categories
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [incomeResponse, categoryResponse] = await Promise.all([getIncomes(), getCategories()]);
-  
-        if (incomeResponse.status && categoryResponse.status) {
-          const incomesWithCategories = await Promise.all(
-            incomeResponse.data.map(async (income) => {
-              const category = await getCategory(income.category_id);
-              const categoryName = category.data ? category.data.name : "?";
-              return { ...income, category: categoryName };
-            })
-          );
-          setIncomes(incomesWithCategories);
-          setCategories(categoryResponse.data);
-        } else {
-          throw new Error('Veriler alınamadı.');
+      if (config?.headers?.Authorization) {
+        setLoading(true);
+        try {
+          const [incomeResponse, categoryResponse] = await Promise.all([getIncomes(config), getCategories(config)]);
+
+          if (incomeResponse.status && categoryResponse.status) {
+            const incomesWithCategories = await Promise.all(
+              incomeResponse.data.map(async (income) => {
+                const category = await getCategory(income.category_id, config);
+                const categoryName = category.data ? category.data.name : "?";
+                return { ...income, category: categoryName };
+              })
+            );
+            setIncomes(incomesWithCategories);
+            setCategories(categoryResponse.data);
+          } else {
+            throw new Error('Veriler alınamadı.');
+          }
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Hata!',
+            text: 'Veriler alınırken bir hata oluştu!',
+          });
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Hata!',
-          text: 'Veriler alınırken bir hata oluştu!',
-        });
-      } finally {
-        setLoading(false);
       }
     };
-  
+
     fetchData();
-  }, []);  
+  }, [config]);
 
   const handleCreateIncome = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await createIncome(newIncome);
+      const response = await createIncome(newIncome, config);
       if (response.status) {
         const categoryName = categories.find((cat) => cat.id === Number(newIncome.category_id))?.name || 'Belirtilmedi';
         const updatedIncome = { ...newIncome, id: response.data.id, category: categoryName };
@@ -77,19 +100,19 @@ const IncomePage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await updateIncome(newIncome);
+      const response = await updateIncome(newIncome, config);
       if (response.status) {
-        
+
         const categoryName = categories.find((cat) => cat.id === Number(newIncome.category_id))?.name || 'Belirtilmedi';
         const updatedIncome = { ...newIncome, id: newIncome.id, category: categoryName };
         const updatedIncomes = incomes.map((income) => {
           if (income.id === updatedIncome.id) {
-              return { ...income, ...updatedIncome };
+            return { ...income, ...updatedIncome };
           }
           return income;
-      });
-      
-      setIncomes(updatedIncomes);
+        });
+
+        setIncomes(updatedIncomes);
         setNewIncome({ id: '', category_id: '', amount: '' });
         setIsEditing(false);
         Swal.fire('Başarılı!', 'Gelir başarıyla güncellendi.', 'success');
@@ -118,7 +141,7 @@ const IncomePage = () => {
       if (result.isConfirmed) {
         setLoading(true);
         try {
-          const response = await deleteIncome({id: income.id});
+          const response = await deleteIncome({ id: income.id }, config);
           if (response.status) {
             setIncomes(incomes.filter((inc) => inc.id !== income.id));
             Swal.fire('Başarılı!', 'Gelir silindi.', 'success');

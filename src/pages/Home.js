@@ -12,62 +12,87 @@ const Home = () => {
   const [incomesWithCategory, setIncomesWithCategory] = useState([]);
   const [expensesWithCategory, setExpensesWithCategory] = useState([]);
 
+  const [token, setToken] = useState('');
+  const [config, setConfig] = useState({ headers: { 'Content-Type': 'application/json' } });
+
   useEffect(() => {
-    const fetchDataFromApi = async () => {
-      const result = await getTotal();
-      setData({
-        incomeTotal: result?.data?.total_income,
-        expenseTotal: result?.data?.total_expense
-      });
-    };
-    fetchDataFromApi();
+    const t = localStorage.getItem('token');
+    if (t) {
+      setToken(t);
+    }
   }, []);
 
   useEffect(() => {
-    const fetchTotalWithCategory = async () => {
-      const result = await getTotalWithCategory();
-  
-      const expenses = result?.data?.expenses || {};
-      const incomes = result?.data?.incomes || {};
-  
-      // Check if expenses or incomes are not empty before proceeding with Object.entries
-      setExpensesWithCategory(await Promise.all(Object.entries(expenses).map(async ([categoryId, amount]) => {
-        const category = await getExpenseCategory(categoryId);
-        const categoryName = category.data ? category.data.name : "?";
-        return { categoryId, amount, category: categoryName };
-      })));
-  
-      setIncomesWithCategory(await Promise.all(Object.entries(incomes).map(async ([categoryId, amount]) => {
-        const category = await getIncomeCategory(categoryId);
-        const categoryName = category.data ? category.data.name : "?";
-        return { categoryId, amount, category: categoryName };
-      })));
-  
-      if (Object.keys(expenses).length > 0) {
-        const mostValuedExpenseCategory = Object.keys(expenses).reduce((maxKey, currentKey) => {
-          return expenses[currentKey] > expenses[maxKey] ? currentKey : maxKey;
-        }, Object.keys(expenses)[0]);
-  
-        const mostValuedExpenseAmount = expenses[mostValuedExpenseCategory];
-        const expenseCategory = await getExpenseCategory(mostValuedExpenseCategory);
-        const expenseCategoryName = expenseCategory.data ? expenseCategory.data.name : "?";
-        setMostValuedExpense({ category: expenseCategoryName, amount: mostValuedExpenseAmount });
-      }
-  
-      if (Object.keys(incomes).length > 0) {
-        const mostValuedIncomeCategory = Object.keys(incomes).reduce((maxKey, currentKey) => {
-          return incomes[currentKey] > incomes[maxKey] ? currentKey : maxKey;
-        }, Object.keys(incomes)[0]);
-  
-        const mostValuedIncomeAmount = incomes[mostValuedIncomeCategory];
-        const incomeCategory = await getIncomeCategory(mostValuedIncomeCategory);
-        const incomeCategoryName = incomeCategory.data ? incomeCategory.data.name : "?";
-        setMostValuedIncome({ category: incomeCategoryName, amount: mostValuedIncomeAmount });
+    if (token) {
+      setConfig({
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+  }, [token]);
+
+  useEffect(() => {
+    const fetchDataFromApi = async () => {
+      if (config?.headers?.Authorization) {
+        const result = await getTotal(config);
+        setData({
+          incomeTotal: result?.data?.total_income,
+          expenseTotal: result?.data?.total_expense
+        });
       }
     };
-  
+    fetchDataFromApi();
+  }, [config]);
+
+  useEffect(() => {
+    const fetchTotalWithCategory = async () => {
+      if (config?.headers?.Authorization) {
+        const result = await getTotalWithCategory(config);
+
+        const expenses = result?.data?.expenses || {};
+        const incomes = result?.data?.incomes || {};
+
+        // Check if expenses or incomes are not empty before proceeding with Object.entries
+        setExpensesWithCategory(await Promise.all(Object.entries(expenses).map(async ([categoryId, amount]) => {
+          const category = await getExpenseCategory(categoryId, config);
+          const categoryName = category.data ? category.data.name : "?";
+          return { categoryId, amount, category: categoryName };
+        })));
+
+        setIncomesWithCategory(await Promise.all(Object.entries(incomes).map(async ([categoryId, amount]) => {
+          const category = await getIncomeCategory(categoryId, config);
+          const categoryName = category.data ? category.data.name : "?";
+          return { categoryId, amount, category: categoryName };
+        })));
+
+        if (Object.keys(expenses).length > 0) {
+          const mostValuedExpenseCategory = Object.keys(expenses).reduce((maxKey, currentKey) => {
+            return expenses[currentKey] > expenses[maxKey] ? currentKey : maxKey;
+          }, Object.keys(expenses)[0]);
+
+          const mostValuedExpenseAmount = expenses[mostValuedExpenseCategory];
+          const expenseCategory = await getExpenseCategory(mostValuedExpenseCategory, config);
+          const expenseCategoryName = expenseCategory.data ? expenseCategory.data.name : "?";
+          setMostValuedExpense({ category: expenseCategoryName, amount: mostValuedExpenseAmount });
+        }
+
+        if (Object.keys(incomes).length > 0) {
+          const mostValuedIncomeCategory = Object.keys(incomes).reduce((maxKey, currentKey) => {
+            return incomes[currentKey] > incomes[maxKey] ? currentKey : maxKey;
+          }, Object.keys(incomes)[0]);
+
+          const mostValuedIncomeAmount = incomes[mostValuedIncomeCategory];
+          const incomeCategory = await getIncomeCategory(mostValuedIncomeCategory, config);
+          const incomeCategoryName = incomeCategory.data ? incomeCategory.data.name : "?";
+          setMostValuedIncome({ category: incomeCategoryName, amount: mostValuedIncomeAmount });
+        }
+      }
+    };
+
     fetchTotalWithCategory();
-  }, []);  
+  }, [config]);
 
   const totalIncome = data.incomeTotal;
   const totalExpense = data.expenseTotal;

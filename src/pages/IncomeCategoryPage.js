@@ -8,37 +8,60 @@ const IncomeCategoryPage = () => {
     const [newCategory, setNewCategory] = useState({ id: '', name: '' });
     const [isEditing, setIsEditing] = useState(false);
 
+    const [token, setToken] = useState('');
+    const [config, setConfig] = useState({ headers: { 'Content-Type': 'application/json' } });
+
+    useEffect(() => {
+        const t = localStorage.getItem('token');
+        if (t) {
+            setToken(t);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (token) {
+            setConfig({
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+        }
+    }, [token]);
+
     // Fetch categories
     useEffect(() => {
         const fetchData = async () => {
-            setLoading(true);
-            try {
-                const [categoryResponse] = await Promise.all([getCategories()]);
+            if (config?.headers?.Authorization) {
+                setLoading(true);
+                try {
+                    const [categoryResponse] = await Promise.all([getCategories(config)]);
 
-                if (categoryResponse.status) {
-                    setCategories(categoryResponse.data);
-                } else {
-                    throw new Error('Veriler alınamadı.');
+                    if (categoryResponse.status) {
+                        setCategories(categoryResponse.data);
+                    } else {
+                        throw new Error('Veriler alınamadı.');
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata!',
+                        text: 'Veriler alınırken bir hata oluştu!',
+                    });
+                } finally {
+                    setLoading(false);
                 }
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Hata!',
-                    text: 'Veriler alınırken bir hata oluştu!',
-                });
-            } finally {
-                setLoading(false);
             }
         };
 
         fetchData();
-    }, []);
+    }, [config]);
 
     const handleCreateCategory = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await createCategory(newCategory);
+            const response = await createCategory(newCategory, config);
             console.log(response)
             if (response && response.status) {
                 const updatedCategory = { ...newCategory, id: response.data.id };
@@ -72,7 +95,7 @@ const IncomeCategoryPage = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await updateCategory(newCategory);
+            const response = await updateCategory(newCategory, config);
             if (response.status) {
                 const updatedCategories = categories.map((category) => {
                     if (category.id === newCategory.id) {
@@ -114,7 +137,7 @@ const IncomeCategoryPage = () => {
             if (result.isConfirmed) {
                 setLoading(true);
                 try {
-                    const response = await deleteCategory({ id: category.id });
+                    const response = await deleteCategory({ id: category.id }, config);
                     if (response.status) {
                         setCategories(categories.filter((inc) => inc.id !== category.id));
                         Swal.fire('Başarılı!', 'Kategori silindi.', 'success');

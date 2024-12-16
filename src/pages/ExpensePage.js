@@ -9,45 +9,68 @@ const ExpensePage = () => {
   const [newExpense, setNewExpense] = useState({ id: '', category_id: '', amount: '' });
   const [isEditing, setIsEditing] = useState(false);
 
+  const [token, setToken] = useState('');
+  const [config, setConfig] = useState({ headers: { 'Content-Type': 'application/json' } });
+
+  useEffect(() => {
+    const t = localStorage.getItem('token');
+    if (t) {
+      setToken(t);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (token) {
+      setConfig({
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+  }, [token]);
+
   // Fetch expenses and categories
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [expenseResponse, categoryResponse] = await Promise.all([getExpenses(), getCategories()]);
-  
-        if (expenseResponse.status && categoryResponse.status) {
-          const expensesWithCategories = await Promise.all(
-            expenseResponse.data.map(async (expense) => {
-              const category = await getCategory(expense.category_id);
-              const categoryName = category.data ? category.data.name : "?";
-              return { ...expense, category: categoryName };
-            })
-          );
-          setExpenses(expensesWithCategories);
-          setCategories(categoryResponse.data);
-        } else {
-          throw new Error('Veriler alınamadı.');
+      if (config?.headers?.Authorization) {
+        setLoading(true);
+        try {
+          const [expenseResponse, categoryResponse] = await Promise.all([getExpenses(config), getCategories(config)]);
+
+          if (expenseResponse.status && categoryResponse.status) {
+            const expensesWithCategories = await Promise.all(
+              expenseResponse.data.map(async (expense) => {
+                const category = await getCategory(expense.category_id, config);
+                const categoryName = category.data ? category.data.name : "?";
+                return { ...expense, category: categoryName };
+              })
+            );
+            setExpenses(expensesWithCategories);
+            setCategories(categoryResponse.data);
+          } else {
+            throw new Error('Veriler alınamadı.');
+          }
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Hata!',
+            text: 'Veriler alınırken bir hata oluştu!',
+          });
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Hata!',
-          text: 'Veriler alınırken bir hata oluştu!',
-        });
-      } finally {
-        setLoading(false);
       }
     };
-  
+
     fetchData();
-  }, []);  
+  }, [config]);
 
   const handleCreateExpense = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await createExpense(newExpense);
+      const response = await createExpense(newExpense, config);
       if (response.status) {
         const categoryName = categories.find((cat) => cat.id === Number(newExpense.category_id))?.name || 'Belirtilmedi';
         const updatedExpense = { ...newExpense, id: response.data.id, category: categoryName };
@@ -77,19 +100,19 @@ const ExpensePage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await updateExpense(newExpense);
+      const response = await updateExpense(newExpense, config);
       if (response.status) {
-        
+
         const categoryName = categories.find((cat) => cat.id === Number(newExpense.category_id))?.name || 'Belirtilmedi';
         const updatedExpense = { ...newExpense, id: newExpense.id, category: categoryName };
         const updatedExpenses = expenses.map((expense) => {
           if (expense.id === updatedExpense.id) {
-              return { ...expense, ...updatedExpense };
+            return { ...expense, ...updatedExpense };
           }
           return expense;
-      });
-      
-      setExpenses(updatedExpenses);
+        });
+
+        setExpenses(updatedExpenses);
         setNewExpense({ id: '', category_id: '', amount: '' });
         setIsEditing(false);
         Swal.fire('Başarılı!', 'Gider başarıyla güncellendi.', 'success');
@@ -118,7 +141,7 @@ const ExpensePage = () => {
       if (result.isConfirmed) {
         setLoading(true);
         try {
-          const response = await deleteExpense({id: expense.id});
+          const response = await deleteExpense({ id: expense.id }, config);
           if (response.status) {
             setExpenses(expenses.filter((inc) => inc.id !== expense.id));
             Swal.fire('Başarılı!', 'Gider silindi.', 'success');

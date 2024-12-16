@@ -15,6 +15,10 @@ const Login = () => {
     }
   }, [navigate]);
 
+  console.log({
+    token: localStorage.getItem('token'),
+  })
+
   const handleLogin = async (e) => {
     e.preventDefault();
 

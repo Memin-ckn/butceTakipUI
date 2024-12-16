@@ -2,18 +2,8 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:5001/income-categories/';
 
-const token = localStorage.getItem('token');
-const config = token
-  ? {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    }
-  : { headers: { 'Content-Type': 'application/json' } };
-
 // Fetch a single category by ID
-export const getCategory = async (categoryId) => {
+export const getCategory = async (categoryId, config) => {
   try {
     const response = await axios.get(`${API_URL}get?id=${categoryId}`, config);
     return response.data;
@@ -24,7 +14,7 @@ export const getCategory = async (categoryId) => {
 };
 
 // Fetch all categories
-export const getCategories = async () => {
+export const getCategories = async (config) => {
   try {
     const response = await axios.get(API_URL, config);
     return response.data;
@@ -35,7 +25,7 @@ export const getCategories = async () => {
 };
 
 // Create a new category
-export const createCategory = async (categoryData) => {
+export const createCategory = async (categoryData, config) => {
   try {
     const response = await axios.post(API_URL, categoryData, config);
     return response.data;
@@ -46,7 +36,7 @@ export const createCategory = async (categoryData) => {
 };
 
 // Update an existing category
-export const updateCategory = async (categoryData) => {
+export const updateCategory = async (categoryData, config) => {
   try {
     const response = await axios.put(API_URL, categoryData, config);
     return response.data;
@@ -57,7 +47,7 @@ export const updateCategory = async (categoryData) => {
 };
 
 // Delete an category
-export const deleteCategory = async (categoryData) => {
+export const deleteCategory = async (categoryData, config) => {
   try {
     const response = await axios.delete(API_URL, {
       data: categoryData,

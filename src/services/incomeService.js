@@ -3,18 +3,8 @@ import axios from 'axios';
 const API_URL = 'http://localhost:5001/incomes/';
 const CATEGORY_API_URL = 'http://localhost:5001/income-categories/';
 
-const token = localStorage.getItem('token');
-const config = token
-  ? {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    }
-  : { headers: { 'Content-Type': 'application/json' } };
-
 // Fetch all incomes
-export const getIncomes = async () => {
+export const getIncomes = async (config) => {
   try {
     const response = await axios.get(API_URL, config);
     return response.data;
@@ -25,7 +15,7 @@ export const getIncomes = async () => {
 };
 
 // Fetch a single category by ID
-export const getCategory = async (categoryId) => {
+export const getCategory = async (categoryId, config) => {
   try {
     const response = await axios.get(`${CATEGORY_API_URL}get?id=${categoryId}`, config);
     return response.data;
@@ -36,7 +26,7 @@ export const getCategory = async (categoryId) => {
 };
 
 // Fetch all categories
-export const getCategories = async () => {
+export const getCategories = async (config) => {
   try {
     const response = await axios.get(CATEGORY_API_URL, config);
     return response.data;
@@ -47,7 +37,7 @@ export const getCategories = async () => {
 };
 
 // Create a new income
-export const createIncome = async (incomeData) => {
+export const createIncome = async (incomeData, config) => {
   try {
     const response = await axios.post(API_URL, incomeData, config);
     return response.data;
@@ -58,7 +48,7 @@ export const createIncome = async (incomeData) => {
 };
 
 // Update an existing income
-export const updateIncome = async (incomeData) => {
+export const updateIncome = async (incomeData, config) => {
   try {
     const response = await axios.put(API_URL, incomeData, config);
     return response.data;
@@ -69,7 +59,7 @@ export const updateIncome = async (incomeData) => {
 };
 
 // Delete an income
-export const deleteIncome = async (incomeData) => {
+export const deleteIncome = async (incomeData, config) => {
   try {
     const response = await axios.delete(API_URL, {
       data: incomeData,
