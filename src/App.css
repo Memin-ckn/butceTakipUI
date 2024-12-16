@@ -36,3 +36,43 @@
     transform: rotate(360deg);
   }
 }
+
+.home-container {
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  background-color: #f7f7f7;
+}
+
+.page-title {
+  font-size: 36px;
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.charts-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.chart-box {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 48%;
+}
+
+.chart-section {
+  width: 48%;
+}
+
+.section-title {
+  font-size: 24px;
+  color: #444;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
